@@ -193,6 +193,49 @@ def shell(site, body, depth=0, canonical=""):
 """
 
 
+def offer_schema(product):
+    return [{
+        "@type": "Offer",
+        "price": f"{o['price']:.2f}",
+        "priceCurrency": "USD",
+        "availability": ("https://schema.org/InStock" if o.get("in_stock")
+                         else "https://schema.org/OutOfStock"),
+        "url": o["url"],
+        "seller": {"@type": "Organization", "name": RETAILERS[o["retailer"]]["label"]},
+    } for o in product["offers"]]
+
+
+def _script(data):
+    return f'<script type="application/ld+json">{json.dumps(data)}</script>'
+
+
+def product_jsonld(site, p):
+    """Product + Offer schema for a single product page.
+
+    No aggregateRating: we have no verified review counts, and inventing them
+    is a structured-data violation rather than an optimisation.
+    """
+    product = {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        "name": p["name"],
+        "sku": p["id"],
+        "brand": {"@type": "Brand", "name": p["brand"]},
+        "description": p["summary"],
+        "offers": offer_schema(p),
+    }
+    crumbs = {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "All models",
+             "item": site.get("base_url", "") + "/"},
+            {"@type": "ListItem", "position": 2, "name": p["name"]},
+        ],
+    }
+    return _script(product) + _script(crumbs)
+
+
 def jsonld(site, products):
     items = []
     for i, p in enumerate(products, start=1):
@@ -209,7 +252,7 @@ def jsonld(site, products):
                     "price": f"{o['price']:.2f}",
                     "priceCurrency": "USD",
                     "availability": "https://schema.org/InStock" if o.get("in_stock") else "https://schema.org/OutOfStock",
-                    "url": o["href"],
+                    "url": o["url"],
                     "seller": {"@type": "Organization", "name": RETAILERS[o["retailer"]]["label"]},
                 } for o in p["offers"]],
             },
@@ -330,6 +373,7 @@ def product_body(site, products, p):
 
 <h2>Also consider</h2>
 <ul>{rel}</ul>
+{product_jsonld(site, p)}
 """
 
 
