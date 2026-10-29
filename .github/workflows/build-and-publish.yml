@@ -30,6 +30,10 @@ jobs:
           python-version: "3.11"
 
       - name: Generate site
+        env:
+          # Set this under Settings > Secrets and variables > Actions > Variables.
+          # Empty falls back to config/analytics.json.
+          GA4_MEASUREMENT_ID: ${{ vars.GA4_MEASUREMENT_ID }}
         run: |
           FEED_NAME="${{ vars.FEED }}"
           if [ -z "$FEED_NAME" ]; then FEED_NAME="sample"; fi

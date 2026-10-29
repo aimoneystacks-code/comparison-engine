@@ -52,6 +52,34 @@ approved -> then add the second and third program.
 
 ---
 
+## Analytics (optional)
+
+The tag is off until you give it a GA4 Measurement ID. With no ID, no
+script is emitted at all, so the site ships clean.
+
+Two ways to set it, env var wins:
+
+1. `config/analytics.json` -> `"ga4_measurement_id": "G-XXXXXXXXXX"`
+2. Repository variable `GA4_MEASUREMENT_ID` (Settings -> Secrets and
+   variables -> Actions -> Variables). Use this one for CI; it needs no commit.
+
+A Measurement ID is public by design. It ships in the page source of every
+site that uses it, so committing it is fine.
+
+**What it tracks.** Standard `page_view`, plus an `affiliate_click` event fired
+on every retailer button carrying `retailer`, `product`, and `price`. That
+second one is the number that matters: pageviews are vanity, affiliate clicks
+per visitor tell you whether the page is doing its job.
+
+Custom parameters don't appear in GA4 reports until you register them. Go to
+Admin -> Custom definitions -> Create custom dimension, scope = Event, and add
+`retailer`, `product`, and `price` one at a time. Then build an exploration
+grouped by `retailer` to see which merchant your traffic prefers.
+
+**Caveat worth knowing.** GA4 sets cookies. If you take meaningful EU or UK
+traffic you need a consent mechanism before collection is lawful there, and
+this engine does not ship one. US-only traffic is the simpler path.
+
 ## Why "multiply and repeat" backfires
 
 Mass-generating near-identical thin sites is explicitly what Google's spam

@@ -1,0 +1,5 @@
+{
+  "_comment": "Paste your GA4 Measurement ID below (Admin > Data Streams > your web stream). Leave empty and no analytics tag is emitted at all.",
+  "ga4_measurement_id": "",
+  "_note": "A GA4 Measurement ID is public by design: it ships in the page source of every site that uses it. It is not a secret and is safe to commit."
+}

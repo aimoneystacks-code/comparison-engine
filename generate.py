@@ -8,6 +8,8 @@ No dependencies, no framework, no build step beyond this file.
 Usage:  python3 generate.py feeds/sample.json
 """
 import json
+import os
+import re
 import sys
 import shutil
 import html
@@ -103,6 +105,81 @@ def enrich(site, products, cfg):
 
 
 # --------------------------------------------------------------------------
+# analytics: optional GA4, off unless a Measurement ID is configured
+# --------------------------------------------------------------------------
+GA_CLICK_JS = """
+<script>
+(function () {
+  if (typeof gtag !== "function") return;
+  document.addEventListener("click", function (e) {
+    var el = e.target;
+    if (!el || !el.closest) return;
+    var a = el.closest("a[data-retailer]");
+    if (!a) return;
+    gtag("event", "affiliate_click", {
+      retailer: a.getAttribute("data-retailer"),
+      product: a.getAttribute("data-product"),
+      price: parseFloat(a.getAttribute("data-price") || "0"),
+      outbound_url: a.href
+    });
+  }, true);
+})();
+</script>
+"""
+
+
+def load_analytics():
+    """Config file, with a GA4_MEASUREMENT_ID env var taking precedence.
+
+    The env override lets CI supply the ID from a repository variable, so it
+    can be swapped without editing tracked files.
+    """
+    analytics = {}
+    path = ROOT / "config" / "analytics.json"
+    if path.exists():
+        try:
+            analytics = json.loads(path.read_text())
+        except (json.JSONDecodeError, OSError) as exc:
+            raise SystemExit(f"config/analytics.json is unreadable: {exc}")
+    env_id = os.environ.get("GA4_MEASUREMENT_ID", "").strip()
+    if env_id:
+        analytics = {**analytics, "ga4_measurement_id": env_id}
+    return analytics
+
+
+def ga_measurement_id(analytics):
+    """Return a validated GA4 ID, or "" when analytics is not configured."""
+    ga_id = ((analytics or {}).get("ga4_measurement_id") or "").strip()
+    if not ga_id:
+        return ""
+    if not re.fullmatch(r"G-[A-Z0-9]{4,20}", ga_id):
+        raise SystemExit(
+            "config/analytics.json: {!r} is not a GA4 Measurement ID "
+            "(expected G-XXXXXXXXXX)".format(ga_id)
+        )
+    return ga_id
+
+
+def analytics_head(analytics):
+    """GA4 tag plus affiliate-click events. Returns nothing when unconfigured.
+
+    No ID means no tag at all, so a fresh clone or CI run never ships a dead
+    analytics snippet that would 404 on every page load.
+    """
+    ga_id = ga_measurement_id(analytics)
+    if not ga_id:
+        return ""
+    tag = f"""<script async src="https://www.googletagmanager.com/gtag/js?id={ga_id}"></script>
+<script>
+window.dataLayer = window.dataLayer || [];
+function gtag(){{dataLayer.push(arguments);}}
+gtag("js", new Date());
+gtag("config", "{ga_id}", {{ send_page_view: true }});
+</script>"""
+    return tag + GA_CLICK_JS
+
+
+# --------------------------------------------------------------------------
 # templates
 # --------------------------------------------------------------------------
 CSS = """
@@ -164,7 +241,7 @@ footer.site a{color:var(--muted)}
 """
 
 
-def shell(site, body, depth=0, canonical=""):
+def shell(site, body, depth=0, canonical="", analytics=None):
     prefix = "../" * depth
     return f"""<!DOCTYPE html>
 <html lang="en">
@@ -175,6 +252,7 @@ def shell(site, body, depth=0, canonical=""):
 <meta name="description" content="{esc(site['tagline'])}">
 {f'<link rel="canonical" href="{esc(site["base_url"])}/{"p/" if depth else ""}">' if site.get('base_url') else ''}
 <style>{CSS}</style>
+{analytics_head(analytics)}
 </head>
 <body>
 <header class="site"><div class="wrap">
@@ -276,6 +354,9 @@ def offer_rows(product, note_prices=True):
         note = f' <span class="brandline">{esc(o["note"])}</span>' if o.get("note") else ""
         action = (
             f'<a class="btn{" ghost" if not is_best else ""}" href="{esc(o["href"])}" '
+            f'data-retailer="{esc(o["retailer"])}" '
+            f'data-product="{esc(product["slug"])}" '
+            f'data-price="{o["price"]:.2f}" '
             f'rel="nofollow sponsored noopener" target="_blank">View at {esc(label)}</a>'
             if o.get("in_stock") else
             f'<span class="brandline">Unavailable</span>'
@@ -385,15 +466,20 @@ def main():
     feed = json.loads(feed_path.read_text())
     site = feed["site"]
     products = enrich(site, feed["products"], json.loads((ROOT / "config" / "affiliates.json").read_text()))
+    analytics = load_analytics()
+    ga_measurement_id(analytics)  # validate before touching dist/
 
     if DIST.exists():
         shutil.rmtree(DIST)
     (DIST / "p").mkdir(parents=True)
 
-    (DIST / "index.html").write_text(shell(site, index_body(site, products)))
+    (DIST / "index.html").write_text(
+        shell(site, index_body(site, products), analytics=analytics)
+    )
     for p in products:
         (DIST / "p" / f"{p['slug']}.html").write_text(
-            shell(site, product_body(site, products, p), depth=1, canonical=p["name"])
+            shell(site, product_body(site, products, p), depth=1,
+                  canonical=p["name"], analytics=analytics)
         )
     (DIST / "robots.txt").write_text("User-agent: *\nAllow: /\n")
     (DIST / "sitemap.xml").write_text(
@@ -408,6 +494,8 @@ def main():
     total = sum(len(p["offers"]) for p in products)
     print(f"built {len(products)} products, {total} offers -> {DIST}")
     print(f"affiliate-tracked links: {linked}/{total}")
+    ga_id = ((analytics or {}).get("ga4_measurement_id") or "").strip()
+    print(f"analytics: {'GA4 ' + ga_id if ga_id else 'none (config/analytics.json is empty)'}")
 
 
 if __name__ == "__main__":
