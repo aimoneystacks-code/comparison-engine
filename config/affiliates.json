@@ -1,0 +1,22 @@
+{
+  "_comment": "Fill in your publisher IDs after each program approves you. Empty strings = links pass through direct (site still works, you just earn nothing yet).",
+  "amazon": {
+    "type": "param",
+    "param": "tag",
+    "id": ""
+  },
+  "ebay": {
+    "type": "rover",
+    "campaign_id": "",
+    "custom_id_prefix": ""
+  },
+  "walmart": {
+    "type": "impact",
+    "publisher_id": "",
+    "campaign_id": "",
+    "ad_id": ""
+  },
+  "google": {
+    "type": "none"
+  }
+}

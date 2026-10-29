@@ -1,0 +1,53 @@
+name: Build and publish
+
+# Rebuilds the comparison site and republishes it to GitHub Pages.
+# Runs on every push to main, on demand, and weekly so prices don't go stale.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Generate site
+        run: |
+          FEED_NAME="${{ vars.FEED }}"
+          if [ -z "$FEED_NAME" ]; then FEED_NAME="sample"; fi
+          echo "Building from feeds/$FEED_NAME.json"
+          python3 generate.py "feeds/$FEED_NAME.json"
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

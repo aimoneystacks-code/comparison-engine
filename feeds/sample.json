@@ -1,0 +1,63 @@
+{
+  "site": {
+    "title": "Best Noise-Cancelling Headphones 2026",
+    "slug": "best-noise-cancelling-headphones",
+    "tagline": "Every major model, priced across four retailers. Updated weekly.",
+    "disclosure": "As an affiliate we may earn a commission when you buy through links on this page. Prices shown are captured at build time and may have changed.",
+    "updated": "2026-10-28"
+  },
+  "products": [
+    {
+      "id": "sony-wh1000xm5",
+      "name": "Sony WH-1000XM5",
+      "brand": "Sony",
+      "summary": "The default pick. Best-in-class noise cancelling with the most comfortable long-wear fit in the category.",
+      "specs": { "Battery": "30 hrs", "Weight": "250 g", "Codecs": "LDAC, AAC, SBC", "Multipoint": "Yes" },
+      "rating": 4.7,
+      "offers": [
+        { "retailer": "amazon", "price": 328.0, "url": "https://www.amazon.com/dp/B09Y2MYL5C", "in_stock": true, "shipping": "Free" },
+        { "retailer": "ebay", "price": 289.99, "url": "https://www.ebay.com/itm/sony-wh1000xm5", "in_stock": true, "shipping": "Free", "note": "Certified refurbished" },
+        { "retailer": "walmart", "price": 348.0, "url": "https://www.walmart.com/ip/sony-wh1000xm5", "in_stock": true, "shipping": "Free" }
+      ]
+    },
+    {
+      "id": "bose-qc-ultra",
+      "name": "Bose QuietComfort Ultra",
+      "brand": "Bose",
+      "summary": "The quietest cabin on a plane. Slightly heavier, best-in-class for flights and open offices.",
+      "specs": { "Battery": "24 hrs", "Weight": "254 g", "Codecs": "aptX Adaptive, AAC", "Multipoint": "Yes" },
+      "rating": 4.6,
+      "offers": [
+        { "retailer": "amazon", "price": 379.0, "url": "https://www.amazon.com/dp/B0CCZ26B5V", "in_stock": true, "shipping": "Free" },
+        { "retailer": "ebay", "price": 329.0, "url": "https://www.ebay.com/itm/bose-qc-ultra", "in_stock": true, "shipping": "Free" },
+        { "retailer": "walmart", "price": 379.0, "url": "https://www.walmart.com/ip/bose-qc-ultra", "in_stock": false, "shipping": "-" }
+      ]
+    },
+    {
+      "id": "apple-airpods-max",
+      "name": "Apple AirPods Max (USB-C)",
+      "brand": "Apple",
+      "summary": "Best build and transparency mode. Only worth it inside the Apple ecosystem.",
+      "specs": { "Battery": "20 hrs", "Weight": "385 g", "Codecs": "AAC", "Multipoint": "No" },
+      "rating": 4.4,
+      "offers": [
+        { "retailer": "amazon", "price": 499.0, "url": "https://www.amazon.com/dp/B0DGJ8DPSF", "in_stock": true, "shipping": "Free" },
+        { "retailer": "ebay", "price": 419.0, "url": "https://www.ebay.com/itm/airpods-max-usbc", "in_stock": true, "shipping": "Free", "note": "Open box" },
+        { "retailer": "walmart", "price": 529.0, "url": "https://www.walmart.com/ip/airpods-max", "in_stock": true, "shipping": "Free" }
+      ]
+    },
+    {
+      "id": "soundcore-space-one",
+      "name": "Soundcore Space One",
+      "brand": "Anker",
+      "summary": "The budget answer. 80% of the flagship experience for a third of the price.",
+      "specs": { "Battery": "40 hrs", "Weight": "263 g", "Codecs": "LDAC, AAC", "Multipoint": "Yes" },
+      "rating": 4.3,
+      "offers": [
+        { "retailer": "amazon", "price": 89.99, "url": "https://www.amazon.com/dp/B0C9QQ1L7S", "in_stock": true, "shipping": "Free" },
+        { "retailer": "ebay", "price": 74.5, "url": "https://www.ebay.com/itm/soundcore-space-one", "in_stock": true, "shipping": "Free" },
+        { "retailer": "walmart", "price": 99.0, "url": "https://www.walmart.com/ip/soundcore-space-one", "in_stock": true, "shipping": "Free" }
+      ]
+    }
+  ]
+}
